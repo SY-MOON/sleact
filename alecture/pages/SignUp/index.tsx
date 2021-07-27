@@ -1,3 +1,4 @@
+import useInput from '@hooks/useInput';
 import React, { useCallback, useState } from 'react';
 import {
   Form,
@@ -10,19 +11,13 @@ import {
 } from './style';
 
 const SignUp = () => {
-  const [email, setEmail] = useState('');
-  const [nickname, setNickname] = useState('');
+  const [email, onChangeEmail, setEmail] = useInput('');
+  const [nickname, onChangeNickname, setNickname] = useInput('');
   const [password, setPassword] = useState('');
-  const [passwordCheck, setPasswordCheck] = useState('');
+  const [passwordCheck, setPasswordCheck] = useState(''); // const [passwordCheck, , setPasswordCheck] = useInput(''); // 이렇게도 가능함
   const [mismatchError, setMismatchError] = useState(false);
 
   // 성능최적화를 위해 useCallback 사용 -> []에 추가한 state가 변경되면 함수를 재실행함(리랜더링을 줄임)
-  const onChangeEmail = useCallback((e) => {
-    setEmail(e.target.value);
-  }, []);
-  const onChangeNickname = useCallback((e) => {
-    setNickname(e.target.value);
-  }, []);
   const onChangePassword = useCallback(
     (e) => {
       setPassword(e.target.value);
