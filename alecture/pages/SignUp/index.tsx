@@ -1,4 +1,5 @@
 import useInput from '@hooks/useInput';
+import axios from 'axios';
 import React, { useCallback, useState } from 'react';
 import {
   Form,
@@ -8,6 +9,7 @@ import {
   Button,
   Header,
   Error,
+  Success,
 } from './style';
 
 const SignUp = () => {
@@ -16,6 +18,8 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [passwordCheck, setPasswordCheck] = useState(''); // const [passwordCheck, , setPasswordCheck] = useInput(''); // 이렇게도 가능함
   const [mismatchError, setMismatchError] = useState(false);
+  const [signUpError, setSignUpError] = useState('');
+  const [signUpSuccess, setSignUpSuccess] = useState(false);
 
   // 성능최적화를 위해 useCallback 사용 -> []에 추가한 state가 변경되면 함수를 재실행함(리랜더링을 줄임)
   const onChangePassword = useCallback(
@@ -35,11 +39,28 @@ const SignUp = () => {
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault();
-      if (!mismatchError) {
-        console.log('가보자고');
+      if (!mismatchError && nickname) {
+        // 요청보내기 전에 초기화하자
+        setSignUpError('');
+        setSignUpSuccess(false);
+        axios
+          .post('/api/users', {
+            email,
+            nickname,
+            password,
+          })
+          .then((response) => {
+            console.log(response);
+            setSignUpSuccess(true);
+          })
+          .catch((error) => {
+            console.log(error.response);
+            setSignUpError(error.response.data);
+          })
+          .finally(() => {});
       }
     },
-    [email, nickname, password, passwordCheck]
+    [email, nickname, password, passwordCheck, mismatchError]
   );
 
   return (
@@ -94,6 +115,11 @@ const SignUp = () => {
             />
           </div>
           {mismatchError && <Error>비밀번호가 일치하지 않습니다.</Error>}
+          {!nickname && <Error>닉네임을 입력해주세요.</Error>}
+          {signUpError && <Error>{signUpError}</Error>}
+          {signUpSuccess && (
+            <Success>회원가입되었습니다! 로그인해주세요.</Success>
+          )}
         </Label>
         <Button type="submit">회원가입</Button>
       </Form>

@@ -81,6 +81,12 @@ const config: Configuration = {
     historyApiFallback: true, // react router에 필요
     port: 3090,
     publicPath: '/dist/',
+    proxy: {
+      '/api/': {
+        target: 'http://localhost:3095',
+        changeOrigin: true
+      }
+    }
   },
 };
 
