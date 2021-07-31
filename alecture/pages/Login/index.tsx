@@ -11,9 +11,16 @@ import {
   Button,
   Header,
 } from '@pages/SignUp/style';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
+import useSWR from 'swr';
+import fetcher from '@utils/fetcher';
 
 const Login = () => {
+  const { data, error, revalidate, mutate } = useSWR(
+    'http://localhost:3095/api/users',
+    fetcher
+  ); // data나 error가 변경되면 rerendering 됨
+  // revalidate는 서버에 요청을 보냄, mutate는 서버를 거치지 않고 데이터를 수정
   const [logInError, setLogInError] = useState(false);
   const [email, onChangeEmail] = useInput('');
   const [password, onChangePassword] = useInput('');
@@ -23,14 +30,22 @@ const Login = () => {
       setLogInError(false);
 
       axios
-        .post('/api/user/login', { email, password })
-        .then(() => {})
+        .post('http://localhost:3095/api/user/login', { email, password })
+        .then((response) => {
+          mutate(response.data);
+          // revalidate();
+        })
         .catch((error) => {
           setLogInError(error.response?.data?.statusCode === 401);
         });
     },
     [email, password]
   );
+
+  if (data) {
+    return <Redirect to="/workspace/channel" />;
+  }
+
   return (
     <div id="container">
       <Header>Sleact</Header>

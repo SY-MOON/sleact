@@ -1,7 +1,9 @@
 import useInput from '@hooks/useInput';
+import fetcher from '@utils/fetcher';
 import axios from 'axios';
 import React, { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
+import useSWR from 'swr';
 import {
   Form,
   Label,
@@ -14,6 +16,10 @@ import {
 } from './style';
 
 const SignUp = () => {
+  const { data, error, revalidate } = useSWR(
+    'http://localhost:3095/api/users',
+    fetcher
+  );
   const [email, onChangeEmail, setEmail] = useInput('');
   const [nickname, onChangeNickname, setNickname] = useInput('');
   const [password, setPassword] = useState('');
@@ -45,11 +51,15 @@ const SignUp = () => {
         setSignUpError('');
         setSignUpSuccess(false);
         axios
-          .post('/api/users', {
-            email,
-            nickname,
-            password,
-          })
+          .post(
+            'http://localhost:3095/api/users',
+            {
+              email,
+              nickname,
+              password,
+            },
+            { withCredentials: true }
+          )
           .then((response) => {
             console.log(response);
             setSignUpSuccess(true);
@@ -63,6 +73,15 @@ const SignUp = () => {
     },
     [email, nickname, password, passwordCheck, mismatchError]
   );
+
+  if (data === undefined) {
+    return <div>로딩중...</div>;
+  }
+
+  // !!!중요!!! return은 항상 hooks보다 아래 있어야함
+  if (data) {
+    return <Redirect to="/workspace/channel" />;
+  }
 
   return (
     <div id="container">
