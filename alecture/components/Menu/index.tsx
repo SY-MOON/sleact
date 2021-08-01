@@ -1,9 +1,8 @@
-import { timeStamp } from 'console';
 import React, { CSSProperties, FC, useCallback } from 'react';
 import { CloseModalButton, CreateMenu } from './style';
 interface Props {
   show: boolean;
-  onCloseModal: () => void;
+  onCloseModal: (e: any) => void;
   style: CSSProperties;
   closeButton?: boolean;
 }
