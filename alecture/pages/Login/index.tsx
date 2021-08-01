@@ -30,10 +30,14 @@ const Login = () => {
       setLogInError(false);
 
       axios
-        .post('http://localhost:3095/api/user/login', { email, password })
+        .post(
+          'http://localhost:3095/api/users/login',
+          { email, password },
+          { withCredentials: true }
+        )
         .then((response) => {
-          mutate(response.data);
-          // revalidate();
+          // mutate(response.data);
+          revalidate();
         })
         .catch((error) => {
           setLogInError(error.response?.data?.statusCode === 401);
@@ -42,7 +46,7 @@ const Login = () => {
     [email, password]
   );
 
-  if (data) {
+  if (!error && data) {
     return <Redirect to="/workspace/channel" />;
   }
 
