@@ -16,10 +16,7 @@ import {
 } from './style';
 
 const SignUp = () => {
-  const { data, error, revalidate } = useSWR(
-    'http://localhost:3095/api/users',
-    fetcher
-  );
+  const { data, error, revalidate } = useSWR('/api/users', fetcher);
   const [email, onChangeEmail, setEmail] = useInput('');
   const [nickname, onChangeNickname, setNickname] = useInput('');
   const [password, setPassword] = useState('');
@@ -52,7 +49,7 @@ const SignUp = () => {
         setSignUpSuccess(false);
         axios
           .post(
-            'http://localhost:3095/api/users',
+            '/api/users',
             {
               email,
               nickname,
@@ -80,7 +77,7 @@ const SignUp = () => {
 
   // !!!중요!!! return은 항상 hooks보다 아래 있어야함
   if (data) {
-    return <Redirect to="/workspace/channel" />;
+    return <Redirect to="/workspace/sleact/channels/일반" />;
   }
 
   return (

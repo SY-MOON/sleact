@@ -23,9 +23,10 @@ const InviteChannelModal: FC<Props> = ({
     useParams<{ workspace: string; channel: string }>();
   const [newMember, onChangeNewMember, setNewMember] = useInput('');
   const { data: userData } = useSWR<IUser>('/api/users', fetcher);
+
   const { revalidate: revalidateMembers } = useSWR<IUser[]>(
     userData
-      ? `/api/workspaces/${workspace}/channels/${channel}/members`
+      ? `http://localhost:3095/api/workspaces/${workspace}/channels/${channel}/members`
       : null,
     fetcher
   );
@@ -37,9 +38,12 @@ const InviteChannelModal: FC<Props> = ({
         return;
       }
       axios
-        .post(`/api/workspaces/${workspace}/channels/${channel}/members`, {
-          email: newMember,
-        })
+        .post(
+          `http://localhost:3095/api/workspaces/${workspace}/channels/${channel}/members`,
+          {
+            email: newMember,
+          }
+        )
         .then(() => {
           revalidateMembers();
           setShowInviteChannelModal(false);

@@ -62,6 +62,7 @@ const Workspace: VFC = () => {
       socket.emit('login', { id: userData.id, channels: channelData.map((v) => v.id) });
     }
   }, [socket, channelData, userData]);
+  
   useEffect(() => {
     return () => {
       disconnect();
@@ -129,6 +130,7 @@ const Workspace: VFC = () => {
   }, []);
 
   const toggleWorkspaceModal = useCallback(() => {
+    console.log(showWorkspaceModal)
     setShowWorkspaceModal((prev) => !prev);
   }, []);
 

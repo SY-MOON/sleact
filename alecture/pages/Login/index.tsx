@@ -16,10 +16,7 @@ import useSWR from 'swr';
 import fetcher from '@utils/fetcher';
 
 const Login = () => {
-  const { data, error, revalidate, mutate } = useSWR(
-    'http://localhost:3095/api/users',
-    fetcher
-  ); // data나 error가 변경되면 rerendering 됨
+  const { data, error, revalidate, mutate } = useSWR('/api/users', fetcher); // data나 error가 변경되면 rerendering 됨
   // revalidate는 서버에 요청을 보냄, mutate는 서버를 거치지 않고 데이터를 수정
   const [logInError, setLogInError] = useState(false);
   const [email, onChangeEmail] = useInput('');
@@ -31,7 +28,7 @@ const Login = () => {
 
       axios
         .post(
-          'http://localhost:3095/api/users/login',
+          '/api/users/login',
           { email, password },
           { withCredentials: true }
         )
@@ -47,7 +44,7 @@ const Login = () => {
   );
 
   if (!error && data) {
-    return <Redirect to="/workspace/sleact/channel/일반" />;
+    return <Redirect to="/workspace/sleact/channels/일반" />;
   }
 
   return (
