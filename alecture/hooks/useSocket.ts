@@ -4,8 +4,9 @@ import { useCallback } from 'react';
 const sockets: { [key: string]: SocketIOClient.Socket } = {};
 const backUrl = 'http://localhost:3095';
 
-const useSocket = (workspace?: string) => {
-
+const useSocket = (
+  workspace?: string
+): [SocketIOClient.Socket | undefined, () => void] => {
   // socket.emit(이벤트명, 데이터) 클라에서 서버로 보내는 것
   // socket.on(이벤트명, 메소드) 서버에서 클라로 보내는 것
 
@@ -20,7 +21,11 @@ const useSocket = (workspace?: string) => {
     return [undefined, disconnect];
   }
 
-  sockets[workspace] = io.connect(`${backUrl}/ws-${workspace}`);
+  if(!sockets[workspace]) {
+    sockets[workspace] = io.connect(`${backUrl}/ws-${workspace}`, {
+      transports: ['websocket'],
+    });
+  }
 
   return [sockets[workspace], disconnect];
 };
