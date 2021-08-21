@@ -58,7 +58,7 @@ const DirectMessage = () => {
           alt={userData.nickname}
         />
       </Header>
-      <ChatList />
+      <ChatList chatData={chatData} />
       <ChatBox
         chat={chat}
         onChangeChat={onChangeChat}
