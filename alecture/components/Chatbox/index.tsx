@@ -1,12 +1,19 @@
 import React, { useCallback, useEffect, useRef, VFC } from 'react';
 import {
   ChatArea,
+  EachMention,
   Form,
   MentionsTextarea,
   SendButton,
   Toolbox,
 } from '@components/Chatbox/style';
 import autosize from 'autosize';
+import { Mention, SuggestionDataItem } from 'react-mentions';
+import { useParams } from 'react-router';
+import useSWR from 'swr';
+import fetcher from '@utils/fetcher';
+import { IUser, IUserWithOnline } from '@typings/db';
+import gravatar from 'gravatar';
 
 interface Props {
   chat: string;
@@ -21,6 +28,20 @@ const ChatBox: VFC<Props> = ({
   onChangeChat,
   placeholder,
 }) => {
+  const { workspace } = useParams<{ workspace?: string }>();
+  const {
+    data: userData,
+    error,
+    revalidate,
+    mutate,
+  } = useSWR<IUser | false>('/api/users', fetcher, {
+    dedupingInterval: 2000,
+  });
+  const { data: memberData } = useSWR<IUserWithOnline[]>(
+    userData ? `/api/workspaces/${workspace}/members` : null,
+    fetcher
+  );
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     if (textareaRef.current) {
@@ -38,6 +59,32 @@ const ChatBox: VFC<Props> = ({
     },
     [onSubmitForm]
   );
+
+  const renderSuggestion = useCallback(
+    (
+      suggestion: SuggestionDataItem,
+      search: string,
+      highlightedDisplay: React.ReactNode,
+      index: number,
+      focus: boolean
+    ): React.ReactNode => {
+      if (!memberData) return;
+      return (
+        <EachMention focus={focus}>
+          <img
+            src={gravatar.url(memberData[index].email, {
+              s: '20px',
+              d: 'retro',
+            })}
+            alt={memberData[index].nickname}
+          />
+          <span>{highlightedDisplay}</span>
+        </EachMention>
+      );
+    },
+    []
+  );
+
   return (
     <ChatArea>
       <Form onSubmit={onSubmitForm}>
@@ -47,8 +94,18 @@ const ChatBox: VFC<Props> = ({
           onChange={onChangeChat}
           onKeyDown={onKeydownChat}
           placeholder={placeholder}
-          ref={textareaRef}
-        />
+          inputRef={textareaRef}
+          allowSuggestionsAboveCursor
+        >
+          <Mention
+            appendSpaceOnAdd
+            trigger="@"
+            data={
+              memberData?.map((v) => ({ id: v.id, display: v.nickname })) || []
+            }
+            renderSuggestion={renderSuggestion}
+          />
+        </MentionsTextarea>
 
         <Toolbox>
           <SendButton
