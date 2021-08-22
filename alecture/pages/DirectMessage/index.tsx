@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Container, Header } from '@pages/DirectMessage/style';
 import gravatar from 'gravatar';
 import fetcher from '@utils/fetcher';
@@ -44,22 +44,43 @@ const DirectMessage = () => {
   const onSubmitForm = useCallback(
     (e) => {
       e.preventDefault();
-      if (chat?.trim()) {
+      if (chat?.trim() && chatData) {
+        const savedChat = chat;
+        mutateChat((prevChatData) => {
+          prevChatData?.[0].unshift({
+            id: (chatData[0][0]?.id || 0) + 1,
+            content: savedChat,
+            SenderId: myData.id,
+            Sender: myData,
+            ReceiverId: userData.id,
+            Receiver: userData,
+            createdAt: new Date(),
+          });
+          return prevChatData;
+        }, false).then(() => {
+          setChat('');
+          scrollbarRef.current?.scrollToBottom();
+        });
         axios
           .post(`/api/workspaces/${workspace}/dms/${id}/chats`, {
             content: chat,
           })
           .then(() => {
             revalidate();
-            setChat('');
           })
           .catch((error) => {
             console.error;
           });
       }
     },
-    [chat]
+    [chat, chatData, myData, userData, workspace, id]
   );
+
+  useEffect(() => {
+    if (chatData?.length === 1) {
+      scrollbarRef.current?.scrollToBottom();
+    }
+  }, [chatData]);
 
   if (!userData || !myData) {
     return null;
@@ -77,9 +98,8 @@ const DirectMessage = () => {
       </Header>
       <ChatList
         chatSections={chatSections}
-        ref={scrollbarRef}
+        srcollRef={scrollbarRef}
         setSize={setSize}
-        isEmpty={isEmpty}
         isReacingEnd={isReacingEnd}
       />
       <ChatBox
