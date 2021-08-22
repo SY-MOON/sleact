@@ -11,6 +11,7 @@ import axios from 'axios';
 import { IDM } from '@typings/db';
 import makeSection from '@utils/makeSection';
 import Scrollbars from 'react-custom-scrollbars';
+import useSocket from '@hooks/useSocket';
 
 const DirectMessage = () => {
   const { workspace, id } = useParams<{ workspace: string; id: string }>();
@@ -32,7 +33,7 @@ const DirectMessage = () => {
       }`,
     fetcher
   );
-
+  const [socket] = useSocket(workspace);
   const isEmpty = chatData?.[0]?.length === 0;
   const isReacingEnd =
     isEmpty ||
@@ -75,6 +76,33 @@ const DirectMessage = () => {
     },
     [chat, chatData, myData, userData, workspace, id]
   );
+
+  const onMessage = useCallback((data: IDM) => {
+    if (data.SenderId === Number(id) && myData.id !== Number(id)) {
+      mutateChat((chatData) => {
+        chatData?.[0].unshift(data);
+        return chatData;
+      }, false).then(() => {
+        if (scrollbarRef.current) {
+          if (
+            scrollbarRef.current.getScrollHeight() <
+            scrollbarRef.current.getClientHeight() +
+              scrollbarRef.current.getScrollTop() +
+              150
+          ) {
+            scrollbarRef.current.scrollToBottom();
+          }
+        }
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    socket?.on('dm', onMessage);
+    return () => {
+      socket?.off('dm', onMessage); // on을 했으면 off를 해줄것
+    };
+  }, [socket, onMessage]);
 
   useEffect(() => {
     if (chatData?.length === 1) {
