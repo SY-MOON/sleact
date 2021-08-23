@@ -26,7 +26,7 @@ const InviteChannelModal: FC<Props> = ({
 
   const { revalidate: revalidateMembers } = useSWR<IUser[]>(
     userData
-      ? `http://localhost:3095/api/workspaces/${workspace}/channels/${channel}/members`
+      ? `http://localhost:3095/api/workspaces/${workspace}/channels/일반/members`
       : null,
     fetcher
   );

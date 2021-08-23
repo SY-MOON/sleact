@@ -234,7 +234,7 @@ const Workspace: VFC = () => {
         <Chats>
           <Switch>
             <Route
-              path="/workspace/:workspace/channel/:channel"
+              path="/workspace/:workspace/channels/:channel"
               component={Channel}
             />
             <Route
